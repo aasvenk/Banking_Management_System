@@ -1,0 +1,12 @@
+fastapi ==0.109.1
+uvicorn
+sqlmodel
+typer
+dynaconf
+jinja2
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+psycopg2-binary
+SQLAlchemy==2.0.21
+SQLAlchemy-Utils==0.41.1
