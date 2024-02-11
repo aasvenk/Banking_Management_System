@@ -3,7 +3,7 @@ from DB import models
 from DB import database
 engine = database.engine
 SessionLocal = database.SessionLocal
-from pydantic import BaseModel,Field
+from DB import schema
 from sqlalchemy.orm import Session
 
 app = FastAPI()
@@ -17,19 +17,13 @@ def get_db():
     finally:
         db.close()
 
-class Book(BaseModel): #Create Validations for the data that is being Commited to the DB. This is needed in FastAPI and is sometimes like the schema and metadata validations for the tables.
-    title :str = Field(min_length = 1)
-    author :str = Field(min_length = 1,max_length= 100)
-    description : str = Field(min_length = 1,max_length = 100)
-    rating : int = Field(gt = -1,lt=101)
-    
 
 @app.get("/")
 def read_api(db:Session = Depends(get_db)):
     return db.query(models.Books).all()
 
 @app.post("/")
-def create_book(book: Book,db:Session = Depends(get_db)):
+def create_book(book: schema.Book,db:Session = Depends(get_db)):
     book_model = models.Books()
     book_model.title = book.title
     book_model.Author = book.author
