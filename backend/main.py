@@ -22,14 +22,14 @@ def get_db():
 def read_api(db:Session = Depends(get_db)):
     return db.query(models.Books).all()
 
-@app.post("/")
-def create_book(book: schema.Book,db:Session = Depends(get_db)):
-    book_model = models.Books()
-    book_model.title = book.title
-    book_model.Author = book.author
-    book_model.description = book.description
-    book_model.rating = book.rating
-    db.add(book_model)
-    db.commit()
+# @app.post("/")
+# def create_book(book: schema.Book,db:Session = Depends(get_db)):
+#     book_model = models.Books()
+#     book_model.title = book.title
+#     book_model.Author = book.author
+#     book_model.description = book.description
+#     book_model.rating = book.rating
+#     db.add(book_model)
+#     db.commit()
     
     
