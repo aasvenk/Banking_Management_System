@@ -6,23 +6,23 @@ from DB.database import Base
 from sqlalchemy.types import Date
 class Users(Base):
     __tablename__ = "Users"
-
     id = Column(Integer, primary_key=True,index= True)
     firstName = Column(String)
     lastName = Column(String)
-    emailId = Column(String)
+    emailId = Column(String, unique=True)
     dob= Column(Date)
     address = Column(String)
     role = Column(String)
-    userInfo= relationship("UserInformation", back_populates="userRegister")
+    # userInfo= relationship("UserInformation", back_populates="userRegister")
 
-class UserInformation(Base):
-    __tablename__ = "UserInformation"
+# class UserInformation(Base):
+#     __tablename__ = "UserInformation"
 
-    id = Column(Integer, primary_key=True,index= True)
-    emailId =Column(String, ForeignKey('Users.emailId'))
-    accountNumber = Column(Integer)
-    custId =Column(String)
-    accountType =Column(String)
-    accountBalance =Column(Float)
-    userRegister=relationship("Users", back_populates="userInfo")
+#     id = Column(Integer, primary_key=True,index= True)
+#     emailId =Column(String, ForeignKey('Users.emailId'),unique= True)
+#     accountNumber = Column(Integer)
+#     custId =Column(String)
+#     accountType =Column(String)
+#     accountBalance =Column(Float)
+#     userRegister=relationship("Users", back_populates="userInfo")
+    

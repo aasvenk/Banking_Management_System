@@ -10,12 +10,12 @@ class User(BaseModel):
     address: str
     role : str
 
-class UserInformation(BaseModel):
-    emailId :str
-    accountNumber: int
-    custId: str
-    accountType: str
-    accountBalance: float
+# class UserInformation(BaseModel):
+#     emailId :str
+#     accountNumber: int
+#     custId: str
+#     accountType: str
+#     accountBalance: float
     
 
 
