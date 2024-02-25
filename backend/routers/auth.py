@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from DB import schema
 from DB import models
 from DB import database
+import utils
 engine=database.engine
 SessionLocal=database.SessionLocal
 
@@ -27,6 +28,7 @@ async def registeration(user:schema.User,db:Session=Depends(get_db)):
     user_model.firstName=user.firstName
     user_model.dob=user.dob
     user_model.emailId=user.emailId
+    user_model.password=str(utils.getHashPassword(user.password))
     user_model.role=user.role
     db.add(user_model)
     db.commit()
