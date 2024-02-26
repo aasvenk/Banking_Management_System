@@ -1,5 +1,4 @@
-from pydantic import BaseModel,Field
-from datetime import datetime, date
+from pydantic import BaseModel,UUID4
 from datetime import date
 
 class User(BaseModel): 
@@ -10,6 +9,15 @@ class User(BaseModel):
     dob :date
     address: str
     role : str
+
+class requestDetails(BaseModel):
+    emailId:str
+    password:str
+
+class tokenSchema(BaseModel):
+    accessToken:str
+    refreshToken:str
+
 
 # class UserInformation(BaseModel):
 #     emailId :str
