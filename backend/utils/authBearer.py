@@ -37,7 +37,7 @@ class jwtBearer(HTTPBearer):
             raise HTTPException(status_code=403, detail="Invalid authorrization code")
         
         
-    def verifyJwt(jwtToken):
+    def verifyJwt(self,jwtToken):
         try:
             payload= decodeJwt(jwtToken)
         except:
