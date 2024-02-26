@@ -85,8 +85,9 @@ def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depends(get_
     
     existingToken = db.query(models.TokenTable).filter(models.TokenTable.userId== userId).all()
     if existingToken: 
-        for Token in existingToken :
-            Token.status = False
+        for token in existingToken :
+            token.status = False
+            db.delete(token)
             db.commit()
     return {"message":"Logout Successful"}
     
