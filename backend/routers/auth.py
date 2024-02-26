@@ -74,11 +74,19 @@ def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depends(get_
     #     if (datetime.utcnow - record.createdDate).total_seconds()/60 > 60:
     #         info.append(record.userId)
 
-    existingToken= db.query(models.TokenTable).filter(models.TokenTable.userId == userId, models.TokenTable.accessToken == token).first()
-    if existingToken:
-        existingToken.status=False
-        db.delete(existingToken)
-        db.commit()
+    # existingToken= db.query(models.TokenTable).filter(models.TokenTable.userId == userId, models.TokenTable.accessToken == token).first()
+    # if existingToken:
+    #     existingToken.status=False
+    #     db.delete(existingToken)
+    #     db.commit()
+    #     db.refresh()
+    # return {"message":"Logout Successful"}
     
+    
+    existingToken = db.query(models.TokenTable).filter(models.TokenTable.userId== userId).all()
+    if existingToken: 
+        for Token in existingToken :
+            Token.status = False
+            db.commit()
     return {"message":"Logout Successful"}
     
