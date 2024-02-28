@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 from DB import schema
 from DB import models
 from DB import database
-import utils
+from utils import utils
+from utils import authBearer
+from jose import jwt
+from datetime import datetime, timedelta
+from jwt.exceptions import InvalidTokenError
+
 engine=database.engine
 SessionLocal=database.SessionLocal
 
@@ -57,6 +62,32 @@ async def login(requestDetails:schema.requestDetails, db:Session=Depends(get_db)
         "refreshToken":refresh
     }
 
+@router .post('/logout')
+def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depends(get_db)):
+    token = dependencies
+    payload= authBearer.decodeJwt(token)
+    userId=payload['sub']
+    tokenRecord=db.query(models.TokenTable).all()
+    #Check later if required
+    # info=[]
+    # for record in tokenRecord:
+    #     if (datetime.utcnow - record.createdDate).total_seconds()/60 > 60:
+    #         info.append(record.userId)
 
-
+    # existingToken= db.query(models.TokenTable).filter(models.TokenTable.userId == userId, models.TokenTable.accessToken == token).first()
+    # if existingToken:
+    #     existingToken.status=False
+    #     db.delete(existingToken)
+    #     db.commit()
+    #     db.refresh()
+    # return {"message":"Logout Successful"}
+    
+    
+    existingToken = db.query(models.TokenTable).filter(models.TokenTable.userId== userId).all()
+    if existingToken: 
+        for token in existingToken :
+            token.status = False
+            db.delete(token)
+            db.commit()
+    return {"message":"Logout Successful"}
     
