@@ -5,11 +5,9 @@ from DB import models
 from DB import database
 from utils import utils
 from utils import authBearer
-from jose import jwt
-from datetime import datetime, timedelta
-from jwt.exceptions import InvalidTokenError
 
-engine=database.engine
+
+
 SessionLocal=database.SessionLocal
 
 router=APIRouter(
@@ -27,15 +25,15 @@ def get_db():
 
 @router .post("/register")
 async def registeration(user:schema.User,db:Session=Depends(get_db)):
-    user_model=models.Users()
-    user_model.address=user.address
-    user_model.lastName=user.lastName
-    user_model.firstName=user.firstName
-    user_model.dob=user.dob
-    user_model.emailId=user.emailId
-    user_model.password=str(utils.getHashPassword(user.password))
-    user_model.role=user.role
-    db.add(user_model)
+    userModel=models.Users()
+    userModel.address=user.address
+    userModel.lastName=user.lastName
+    userModel.firstName=user.firstName
+    userModel.dob=user.dob
+    userModel.emailId=user.emailId
+    userModel.password=str(utils.getHashPassword(user.password))
+    userModel.role=user.role
+    db.add(userModel)
     db.commit()
 
 
