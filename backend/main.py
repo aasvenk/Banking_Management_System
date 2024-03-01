@@ -16,7 +16,7 @@ app.include_router(userInfo.router)
 
 @app.get("/")
 async def root():
-    return {"message":"Hellu hope this works"}
+    return {"Message": "Please visit http://156.56.103.190/docs for all backend operations"}
 
 
 
