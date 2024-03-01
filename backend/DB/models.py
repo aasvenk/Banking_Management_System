@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Date, DateTime
 from sqlalchemy.dialects.postgresql import UUID
@@ -17,7 +17,9 @@ class Users(Base):
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
     role = Column(String,default="Customer")
-    # userInfo= relationship("UserInformation", back_populates="userRegister")
+    userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
+    userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
+
 
 class TokenTable(Base):
     __tablename__="token"
@@ -27,14 +29,19 @@ class TokenTable(Base):
     status=Column(Boolean)
     createdDate=Column(DateTime,default=datetime.datetime.now)
     
-# class UserInformation(Base):
-#     __tablename__ = "UserInformation"
+class UserInformation(Base):
+    __tablename__ = "userinformation"
 
-#     id = Column(Integer, primary_key=True,index= True)
-#     emailId =Column(String, ForeignKey('Users.emailId'),unique= True)
-#     accountNumber = Column(Integer)
-#     custId =Column(String)
-#     accountType =Column(String)
-#     accountBalance =Column(Float)
-#     userRegister=relationship("Users", back_populates="userInfo")
+    id = Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4,index=True)
+    emailId =Column(String, ForeignKey('users.emailId'),unique= True, nullable=False)
+    phoneNo=Column(String,nullable=False,unique=True)
+    address=Column(String,nullable=False,unique=True)
+    accountNumber = Column(BigInteger,nullable=False, unique=True)
+    routingNumber=Column(Integer,nullable=False,default=2081678945)
+    custId =Column(UUID(as_uuid=True),ForeignKey('users.id'),nullable=False)
+    accountType =Column(String,nullable=False)
+    accountBalance =Column(Float,nullable=False)
+    userId=relationship("Users", back_populates="userCustId",foreign_keys=[custId])
+    userEmail=relationship("Users",back_populates="userEmailId",foreign_keys=[emailId])
     
+

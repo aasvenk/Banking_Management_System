@@ -5,13 +5,14 @@ engine = database.engine
 SessionLocal = database.SessionLocal
 # from DB import schema
 # from sqlalchemy.orm import Session
-from routers import auth
+from routers import auth,userInfo
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind= engine) # creates all tables if tables are not yet created when server is restarted.
 
 app.include_router(auth.router)
+app.include_router(userInfo.router)
 
 @app.get("/")
 async def root():
