@@ -16,21 +16,17 @@ app = FastAPI()
 
 models.Base.metadata.create_all(bind= engine) # creates all tables if tables are not yet created when server is restarted.
 
-app.include_router(auth.router)
-app.include_router(userInfo.router)
+origins = os.getenv("FRONTEND_URL"),
 
-origins = [
-    os.getenv("FRONTEND_URL")
-]
-
-print(origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  
     allow_credentials=True,
-    allow_methods=["GET","POST"],  # Consider specifying only the methods you use: ["GET", "POST", ...]
-    allow_headers=["application/json"]  # You might need to specify only the headers your frontend sends
+    allow_methods=["*"], 
+    allow_headers=["*"]
 )
+app.include_router(auth.router)
+app.include_router(userInfo.router)
 
 @app.get("/")
 async def root():

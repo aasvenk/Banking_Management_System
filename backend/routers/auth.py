@@ -5,6 +5,7 @@ from DB import models
 from DB import database
 from utils import utils
 from utils import authBearer
+from fastapi.responses import JSONResponse
 
 
 
@@ -34,9 +35,10 @@ async def registeration(user:schema.User,db:Session=Depends(get_db)):
     userModel.dob=user.dob
     userModel.emailId=user.emailId
     userModel.password=str(utils.getHashPassword(user.password))
-    
+
     db.add(userModel)
     db.commit()
+
 
 
 
