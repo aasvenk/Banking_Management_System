@@ -1,13 +1,14 @@
 import {useState} from "react";
 import axios from "axios";
 
+
 function SignUp(){
     const [accountCreated, setAccountCreated]=useState(false)
     const [firstName,setFirstName]=useState("")
     const[lastName,setLastName]=useState("")
     const[dob,setDOB]=useState("")
     const[emailId,setEmailId]=useState("")
-    const[password,setPassowrd]=useState("")
+    const[password,setPassword]=useState("")
     const[address,setAddress]=useState("")
 
     const userData = {
@@ -15,14 +16,15 @@ function SignUp(){
         lastName:lastName,
         emailId:emailId,
         password:password,
-        dob:dob,    
+        dob:dob,
         address:address
     }
 
     const userDatajson =JSON.stringify(userData)
 
 
-    const handleSignUpButton=()=>{
+    const handleSignUpButton=(e)=>{
+        e.preventDefault(); 
         console.log(userDatajson)
         axios.post("/auth/register", userDatajson, {
             headers: {
@@ -31,10 +33,9 @@ function SignUp(){
           })
         .then((response)=>{
             console.log(response)
-            if (response.status===201){
+            if (response.status===200){
                 setAccountCreated(true)
                 console.log(accountCreated)
-                
             }
         })
         .catch((error)=>{
@@ -52,9 +53,9 @@ function SignUp(){
                 <div>Last Name:<input type="text" value={lastName} required onChange={(e)=>setLastName(e.target.value)}/></div>
                 <div>Date Of Birth:<input type="date" value={dob} required onChange={(e)=>setDOB(e.target.value)}/></div>
                 <div>Email Id:<input type="email" placeholder="xyz@domain.com" value={emailId} required onChange={(e)=>setEmailId(e.target.value)}/></div>
-                <div>Password:<input type="password" value={password} required onChange={(e)=>setPassowrd(e.target.value)}/></div>
+                <div>Password:<input type="password" value={password} required onChange={(e)=>setPassword(e.target.value)}/></div>
                 <div>Address:<input type="text" value={address} required onChange={(e)=>setAddress(e.target.value)}/></div>
-                <div><input type="submit" value="Submit" onClick={handleSignUpButton}/></div>
+                <div><input type="submit" value="Submit" onClick={(e) => handleSignUpButton(e)}/></div>
             </form>
             </div> )}
         {accountCreated &&(
