@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import axios from "axios";
 
 
@@ -35,14 +35,19 @@ function SignUp(){
             console.log(response)
             if (response.status===200){
                 setAccountCreated(true)
-                console.log(accountCreated)
             }
         })
         .catch((error)=>{
             console.error(error)
-            console.log(accountCreated)
         });
+       
+
     };
+
+    useEffect(() => {
+        console.log(accountCreated); // This will log the current state whenever accountCreated changes
+    }, [accountCreated]); 
+
     return(
         <div>
            {!accountCreated && (
