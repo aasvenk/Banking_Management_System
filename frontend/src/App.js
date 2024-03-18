@@ -5,6 +5,7 @@ import axios from "axios"
 import React from 'react';
 
 axios.defaults.baseURL=process.env.REACT_APP_BASE_URL
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 
 function App() {

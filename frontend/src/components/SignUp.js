@@ -10,22 +10,36 @@ function SignUp(){
     const[password,setPassowrd]=useState("")
     const[address,setAddress]=useState("")
 
+    const userData = {
+        firstName:firstName,
+        lastName:lastName,
+        emailId:emailId,
+        password:password,
+        dob:dob,    
+        address:address
+    }
+
+    const userDatajson =JSON.stringify(userData)
+
+
     const handleSignUpButton=()=>{
-        axios.post("/auth/register",{
-            firstName:firstName,
-            lastName:lastName,
-            emailId:emailId,
-            password:password,
-            dob:dob,
-            address:address
-        })
+        console.log(userDatajson)
+        axios.post("/auth/register", userDatajson, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
         .then((response)=>{
-            if (response.status===200){
+            console.log(response)
+            if (response.status===201){
                 setAccountCreated(true)
+                console.log(accountCreated)
+                
             }
         })
         .catch((error)=>{
             console.error(error)
+            console.log(accountCreated)
         });
     };
     return(
