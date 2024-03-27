@@ -6,11 +6,25 @@ SessionLocal = database.SessionLocal
 # from DB import schema
 # from sqlalchemy.orm import Session
 from routers import auth,userInfo
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
+load_dotenv() 
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind= engine) # creates all tables if tables are not yet created when server is restarted.
 
+origins = os.getenv("FRONTEND_URL"),
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
 app.include_router(auth.router)
 app.include_router(userInfo.router)
 

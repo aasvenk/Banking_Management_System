@@ -9,8 +9,8 @@ class User(BaseModel):
     password:str
     dob :date
     address: str
-    role : str
 
+    
 class requestDetails(BaseModel):
     emailId:str
     password:str

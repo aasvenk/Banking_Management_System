@@ -5,6 +5,7 @@ from DB import models
 from DB import database
 from utils import utils
 from utils import authBearer
+from fastapi.responses import JSONResponse
 
 
 
@@ -23,18 +24,22 @@ def get_db():
     finally:
         db.close()
 
-@router .post("/register")
+@router .post("/register",status_code=200)
 async def registeration(user:schema.User,db:Session=Depends(get_db)):
     userModel=models.Users()
+    # if user.emailId  == db.query(models.Users).filter(models.Users.emailId== user.emailId).first().emailId is not None:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email ID already Exists ")
     userModel.address=user.address
     userModel.lastName=user.lastName
     userModel.firstName=user.firstName
     userModel.dob=user.dob
     userModel.emailId=user.emailId
     userModel.password=str(utils.getHashPassword(user.password))
-    userModel.role=user.role
+
     db.add(userModel)
     db.commit()
+
+
 
 
 @router .post("/login")
