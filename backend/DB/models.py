@@ -33,9 +33,9 @@ class UserInformation(Base):
     __tablename__ = "userinformation"
 
     id = Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4,index=True)
-    emailId =Column(String, ForeignKey('users.emailId'),unique= True, nullable=False)
-    phoneNo=Column(String,nullable=False,unique=True)
-    address=Column(String,nullable=False,unique=True)
+    emailId =Column(String, ForeignKey('users.emailId'), nullable=False)
+    phoneNo=Column(String,nullable=False)
+    address=Column(String,nullable=False)
     accountNumber = Column(BigInteger,nullable=False, unique=True)
     routingNumber=Column(Integer,nullable=False,default=2081678945)
     custId =Column(UUID(as_uuid=True),ForeignKey('users.id'),nullable=False)
@@ -43,5 +43,5 @@ class UserInformation(Base):
     accountBalance =Column(Float,nullable=False)
     userId=relationship("Users", back_populates="userCustId",foreign_keys=[custId])
     userEmail=relationship("Users",back_populates="userEmailId",foreign_keys=[emailId])
-    
+
 

@@ -42,18 +42,24 @@ async def getUserInfo(dependencies=Depends(authBearer.jwtBearer()),db:Session=De
     if not tokenInst:
         raise HTTPException(status_code=404, detail="User not logged In")
     userId=tokenInst.userId
-    userInfo=db.query(models.UserInformation).filter(models.UserInformation.custId==userId).first()
+    userInfo=db.query(models.UserInformation).filter(models.UserInformation.custId==userId).all()
     if not userInfo:
         raise HTTPException(status_code=404, detail="UserInfo not found")
-    return{
-        "emailId":userInfo.emailId,
-        "accountNumber":userInfo.accountNumber,
-        "phoneNumber":userInfo.phoneNo,
-        "address":userInfo.address,
-        "routingNumber":userInfo.routingNumber,
-        "accountType":userInfo.accountType,
-        "accountBalance":userInfo.accountBalance
-    }
+    
+    userInfoList = []
+
+    for user in userInfo:
+        user_dict = {
+            "emailId": user.emailId,
+            "accountNumber": user.accountNumber,
+            "phoneNumber": user.phoneNo,
+            "address": user.address,
+            "routingNumber": user.routingNumber,
+            "accountType": user.accountType,
+            "accountBalance": user.accountBalance
+        }
+        userInfoList.append(user_dict)
+    return userInfoList
 
 @router.patch("/updateUser")
 async def updateUser(userInfoUpdateData:schema.userInfoUpdate,dependencies = Depends(authBearer.jwtBearer()),db : Session = Depends(get_db)): 
@@ -61,14 +67,19 @@ async def updateUser(userInfoUpdateData:schema.userInfoUpdate,dependencies = Dep
     if not token:
         raise HTTPException(status_code=404, detail="User not logged In")
     userId = token.userId
-    userInfo = db.query(models.UserInformation).filter(models.UserInformation.custId == userId).first()
+    userInfo = db.query(models.UserInformation).filter(models.UserInformation.custId == userId).all()
     if not userInfo:
         raise HTTPException(status_code=404, detail="UserInfo not found")
     
     userInfoUpdate= userInfoUpdateData.model_dump(exclude_unset= True)
 
-    for key,value in userInfoUpdate.items(): 
-        setattr(userInfo,key,value)
-    db.commit()
-    return {"message":"Successfully Updated data"}
+    UserUpdate = db.query(models.Users).filter(models.Users.id == userId).first()
 
+    if "address" in userInfoUpdate:
+        UserUpdate.address = userInfoUpdate["address"]
+
+    for user in userInfo:
+        for key, value in userInfoUpdate.items():
+            setattr(user, key, value)
+    db.commit()
+    return "User Updated Successfully"
