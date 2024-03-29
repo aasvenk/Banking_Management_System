@@ -43,5 +43,17 @@ class UserInformation(Base):
     accountBalance =Column(Float,nullable=False)
     userId=relationship("Users", back_populates="userCustId",foreign_keys=[custId])
     userEmail=relationship("Users",back_populates="userEmailId",foreign_keys=[emailId])
+    userAccountNo = relationship("TransferRequest",back_populates= "userAccountNumber", foreign_keys= "TransferRequest.fromAccountNumber")
+
+class TransferRequest(Base):
+    __tablename__ = "transferrequests"
+
+    id = Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4,index=True)
+    fromAccountNumber = Column(BigInteger, ForeignKey('userinformation.accountNumber'))
+    toAccountNumber = Column(BigInteger, index=True)
+    toRoutingNumber = Column(Integer, index=True)
+    amount = Column(Float)
+    approved = Column(Boolean, default=False)
+    userAccountNumber = relationship("UserInformation", back_populates= "userAccountNo", foreign_keys= [fromAccountNumber])
 
 

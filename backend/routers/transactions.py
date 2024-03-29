@@ -4,6 +4,7 @@ from DB import schema
 from DB import models
 from DB import database
 from utils import authBearer
+from uuid import UUID
 
 
 SessionLocal=database.SessionLocal
@@ -76,14 +77,43 @@ def fundTransfer(accountTransfer:schema.accountTransfer,dependencies = Depends(a
         raise HTTPException(status_code= 401, detail = 'Account needs to be updated by Bank Employee with User Information')
     
     receiverInfo =  db.query(models.UserInformation).filter(models.UserInformation.accountNumber==accountTransfer.toAccountNumber,models.UserInformation.routingNumber == accountTransfer.toRoutingNumber).first()
-
+    if not receiverInfo:
+        raise HTTPException(status_code=404,detail="Wrong Account number or routing Number")
+    
     if userInfo.accountBalance < accountTransfer.transferBalance : 
         raise HTTPException(status_code= 403, detail = 'Insufficient funds')
+    
 
-    receiverInfo.accountBalance+= accountTransfer.transferBalance
-    userInfo.accountBalance -= accountTransfer.transferBalance
+    transferRequest = models.TransferRequest(
+        fromAccountNumber=userInfo.accountNumber,
+        toAccountNumber=accountTransfer.toAccountNumber,
+        toRoutingNumber=accountTransfer.toRoutingNumber,
+        amount=accountTransfer.transferBalance,
+        approved=False  
+    )
+
+    db.add(transferRequest)
     db.commit()
-    return "Fund Transfer Completed Successfully"
+
+
+@router.post("/approveTransfer/{requestId}")
+def approveTransfer(requestId: UUID, db: Session = Depends(get_db)):
+    transferRequest = db.query(models.TransferRequest).filter(models.TransferRequest.id == requestId).first()
+    if not transferRequest:
+        raise HTTPException(status_code=404, detail="Transfer request not found")
+
+    if transferRequest.approved:
+        raise HTTPException(status_code=400, detail="Transfer request already approved")
+
+
+    fromUser = db.query(models.UserInformation).filter(models.UserInformation.accountNumber == transferRequest.fromAccountNumber).first()
+    toUser = db.query(models.UserInformation).filter(models.UserInformation.accountNumber == transferRequest.toAccountNumber, models.UserInformation.routingNumber == transferRequest.toRoutingNumber).first()
+
+    fromUser.accountBalance -= transferRequest.amount
+    toUser.accountBalance += transferRequest.amount
+    transferRequest.approved = True
+    db.commit()
+    return {"message": "Transfer approved and completed"}
 
 
 

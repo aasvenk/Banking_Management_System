@@ -1,6 +1,7 @@
 from pydantic import BaseModel,UUID4
 from datetime import date
 from typing import Optional
+from uuid import UUID
 
 class User(BaseModel): 
     firstName : str 
@@ -46,5 +47,6 @@ class accountTransfer(BaseModel):
     toAccountNumber:int
     toRoutingNumber: int
     transferBalance: float
+
 
 
