@@ -36,8 +36,12 @@ class userInfoUpdate(BaseModel):
 #     accountType: str
 #     accountBalance: float
     
-
-
+class emailDetail(BaseModel):
+    emailId:str
+    
+class userAccUpdate(BaseModel):
+    accountType: Optional[str] = None
+    accountBalance : Optional[str] = None
     
     
 
