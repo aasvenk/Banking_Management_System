@@ -35,6 +35,7 @@ async def registeration(user:schema.User,db:Session=Depends(get_db)):
     userModel.dob=user.dob
     userModel.emailId=user.emailId
     userModel.password=str(utils.getHashPassword(user.password))
+    userModel.roles=user.roles
 
     db.add(userModel)
     db.commit()
@@ -66,7 +67,7 @@ async def login(requestDetails:schema.requestDetails, db:Session=Depends(get_db)
     }
 
 @router .post('/logout')
-def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depends(get_db)):
+async def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depends(get_db)):
     token = dependencies
     payload= authBearer.decodeJwt(token)
     userId=payload['sub']

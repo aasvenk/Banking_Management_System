@@ -60,7 +60,7 @@ function SignUp(){
                 <div>Email Id:<input type="email" placeholder="xyz@domain.com" value={emailId} required onChange={(e)=>setEmailId(e.target.value)}/></div>
                 <div>Password:<input type="password" value={password} required onChange={(e)=>setPassword(e.target.value)}/></div>
                 <div>Address:<input type="text" value={address} required onChange={(e)=>setAddress(e.target.value)}/></div>
-                <div><input type="submit" value="Submit" onClick={(e) => handleSignUpButton(e)}/></div>
+                <div><input type="submit" value="Sign Up" onClick={(e) => handleSignUpButton(e)}/></div>
             </form>
             </div> )}
         {accountCreated &&(
