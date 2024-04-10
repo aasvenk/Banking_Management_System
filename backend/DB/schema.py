@@ -1,7 +1,9 @@
 from pydantic import BaseModel,UUID4
 from datetime import date
-from typing import Optional
-from uuid import UUID
+from typing import Optional,List
+from enum import Enum
+
+
 
 class User(BaseModel): 
     firstName : str 
@@ -10,6 +12,7 @@ class User(BaseModel):
     password:str
     dob :date
     address: str
+    roles:List[str]
 
     
 class requestDetails(BaseModel):

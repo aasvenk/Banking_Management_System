@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Date, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from enum import Enum
 from DB.database import Base
 import datetime
@@ -16,7 +16,7 @@ class Users(Base):
     password=Column(String, nullable=False)
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
-    role = Column(String,default="Customer")
+    roles = Column(ARRAY(String))
     userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
     userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
 
