@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from enum import Enum
 from DB.database import Base
 import datetime
+from sqlalchemy.sql import func
 import uuid
 
 class Users(Base):
@@ -16,10 +17,15 @@ class Users(Base):
     password=Column(String, nullable=False)
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
+<<<<<<< Updated upstream
     roles = Column(ARRAY(String))
     userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
+=======
+    role = Column(String,default="Customer")
+    userCustId= relationship("UserInformation", back_populates="userId",foreign_keys="UserInformation.custId")
+>>>>>>> Stashed changes
     userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
-
+    accEmailId = relationship("SelfBankStatements", back_populates="accountEmailId", foreign_keys="SelfBankStatements.emailId")
 
 class TokenTable(Base):
     __tablename__="token"
@@ -44,6 +50,7 @@ class UserInformation(Base):
     userId=relationship("Users", back_populates="userCustId",foreign_keys=[custId])
     userEmail=relationship("Users",back_populates="userEmailId",foreign_keys=[emailId])
     userAccountNo = relationship("TransferRequest",back_populates= "userAccountNumber", foreign_keys= "TransferRequest.fromAccountNumber")
+   
 
 class TransferRequest(Base):
     __tablename__ = "transferrequests"
@@ -57,3 +64,12 @@ class TransferRequest(Base):
     userAccountNumber = relationship("UserInformation", back_populates= "userAccountNo", foreign_keys= [fromAccountNumber])
 
 
+class SelfBankStatements(Base):
+    __tablename__ = "selfbankstatements"  
+    id  = Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4,index=True)
+    emailId =Column(String, ForeignKey('users.emailId'), nullable=False)
+    accountType = Column(String, index=True) 
+    transactionType = Column(String, index=True)  
+    amount = Column(Float) 
+    timestamp = Column(DateTime(timezone=True), server_default=func.now()) 
+    accountEmailId = relationship("Users", back_populates="accEmailId", foreign_keys=[emailId])

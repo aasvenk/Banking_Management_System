@@ -5,6 +5,7 @@ from DB import models
 from DB import database
 from utils import authBearer
 from uuid import UUID
+from datetime import datetime
 
 
 SessionLocal=database.SessionLocal
@@ -49,6 +50,10 @@ def selfTransfer(transferDetails: schema.selfTransferMoney,dependencies = Depend
             else:
                 senderUserInfo.accountBalance -= transferDetails.transferAmount
                 receiverUserInfo.accountBalance += transferDetails.transferAmount
+                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Saving", transactionType="Debit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Checking", transactionType="Credit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                db.add(senderStatement)
+                db.add(receiverStatement)
                 db.commit()
                 return "Transfer funds completed successfully"
         
@@ -60,6 +65,10 @@ def selfTransfer(transferDetails: schema.selfTransferMoney,dependencies = Depend
             else:
                 senderUserInfo.accountBalance -= transferDetails.transferAmount
                 receiverUserInfo.accountBalance += transferDetails.transferAmount
+                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Checking", transactionType="Debit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Saving", transactionType="Credit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                db.add(senderStatement)
+                db.add(receiverStatement)
                 db.commit()
                 return "Transfer funds completed successfully"
     
@@ -97,7 +106,11 @@ def fundTransfer(accountTransfer:schema.accountTransfer,dependencies = Depends(a
 
 
 @router.post("/approveTransfer/{requestId}")
-def approveTransfer(requestId: UUID, db: Session = Depends(get_db)):
+def approveTransfer(requestId: UUID,dependencies = Depends(authBearer.jwtBearer()), db: Session = Depends(get_db)):
+    token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
+    if not token :
+        raise HTTPException (status_code= 404, detail= 'User not logged in')
+
     transferRequest = db.query(models.TransferRequest).filter(models.TransferRequest.id == requestId).first()
     if not transferRequest:
         raise HTTPException(status_code=404, detail="Transfer request not found")
@@ -116,18 +129,13 @@ def approveTransfer(requestId: UUID, db: Session = Depends(get_db)):
     return {"message": "Transfer approved and completed"}
 
 
-
-
-            
-        
-        
-
-
-        
-
-    
-
-
+# @router.get("/getSelfTransfers/")
+# def getAllSelfTransfers(dependencies = Depends(authBearer.jwtBearer()), db: Session = Depends(get_db)):
+#     token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
+#     if not token :
+#         raise HTTPException (status_code= 404, detail= 'User not logged in')
+#     userId=token.userId
+#     emailId = db.query(models.)
 
 
 
@@ -135,9 +143,7 @@ def approveTransfer(requestId: UUID, db: Session = Depends(get_db)):
 
     
 
-
-
-
-
-
+                        
+    
+    
 
