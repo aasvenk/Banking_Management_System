@@ -17,13 +17,8 @@ class Users(Base):
     password=Column(String, nullable=False)
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
-<<<<<<< Updated upstream
     roles = Column(ARRAY(String))
     userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
-=======
-    role = Column(String,default="Customer")
-    userCustId= relationship("UserInformation", back_populates="userId",foreign_keys="UserInformation.custId")
->>>>>>> Stashed changes
     userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
     accEmailId = relationship("SelfBankStatements", back_populates="accountEmailId", foreign_keys="SelfBankStatements.emailId")
 
