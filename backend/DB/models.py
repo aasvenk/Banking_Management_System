@@ -66,5 +66,6 @@ class SelfBankStatements(Base):
     accountType = Column(String, index=True) 
     transactionType = Column(String, index=True)  
     amount = Column(Float) 
+    balance = Column(Float,nullable= False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now()) 
     accountEmailId = relationship("Users", back_populates="accEmailId", foreign_keys=[emailId])

@@ -50,8 +50,8 @@ def selfTransfer(transferDetails: schema.selfTransferMoney,dependencies = Depend
             else:
                 senderUserInfo.accountBalance -= transferDetails.transferAmount
                 receiverUserInfo.accountBalance += transferDetails.transferAmount
-                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Saving", transactionType="Debit", amount=transferDetails.transferAmount, timestamp=datetime.now())
-                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Checking", transactionType="Credit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Saving", transactionType="Debit", amount=transferDetails.transferAmount,balance=senderUserInfo.accountBalance,timestamp=datetime.now())
+                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Checking", transactionType="Credit", amount=transferDetails.transferAmount,balance= receiverUserInfo.accountBalance,timestamp=datetime.now())
                 db.add(senderStatement)
                 db.add(receiverStatement)
                 db.commit()
@@ -65,8 +65,8 @@ def selfTransfer(transferDetails: schema.selfTransferMoney,dependencies = Depend
             else:
                 senderUserInfo.accountBalance -= transferDetails.transferAmount
                 receiverUserInfo.accountBalance += transferDetails.transferAmount
-                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Checking", transactionType="Debit", amount=transferDetails.transferAmount, timestamp=datetime.now())
-                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Saving", transactionType="Credit", amount=transferDetails.transferAmount, timestamp=datetime.now())
+                senderStatement = models.SelfBankStatements(emailId=senderUserInfo.emailId,accountType="Checking", transactionType="Debit", amount=transferDetails.transferAmount,balance=senderUserInfo.accountBalance,timestamp=datetime.now())
+                receiverStatement = models.SelfBankStatements(emailId=receiverUserInfo.emailId, accountType="Saving", transactionType="Credit", amount=transferDetails.transferAmount,balance= receiverUserInfo.accountBalance,timestamp=datetime.now())
                 db.add(senderStatement)
                 db.add(receiverStatement)
                 db.commit()
@@ -129,21 +129,25 @@ def approveTransfer(requestId: UUID,dependencies = Depends(authBearer.jwtBearer(
     return {"message": "Transfer approved and completed"}
 
 
-# @router.get("/getSelfTransfers/")
-# def getAllSelfTransfers(dependencies = Depends(authBearer.jwtBearer()), db: Session = Depends(get_db)):
-#     token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
-#     if not token :
-#         raise HTTPException (status_code= 404, detail= 'User not logged in')
-#     userId=token.userId
-#     emailId = db.query(models.)
-
-
-
-
-
-    
-
-                        
-    
-    
+@router.get("/getSelfTransfers")
+def getAllSelfTransfers(dependencies = Depends(authBearer.jwtBearer()), db: Session = Depends(get_db)):
+    token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
+    if not token :
+        raise HTTPException (status_code= 404, detail= 'User not logged in')
+    userId=token.userId
+    emailId = db.query(models.Users).filter(models.Users.id == userId).first().emailId
+    transactions = db.query(models.SelfBankStatements).filter(models.SelfBankStatements.emailId ==emailId).all()
+    userInfoList = []
+    for transaction in transactions:
+        transDict = {
+        "transactionId": transaction.id,
+        "emailId": transaction.emailId,
+        "accountType": transaction.accountType,
+        "transactionType": transaction.transactionType,
+        "amount": transaction.amount,
+        "Balance":transaction.balance,
+        "timestamp": transaction.accountType
+    }
+        userInfoList.append(transDict)
+    return  userInfoList
 
