@@ -18,13 +18,14 @@ class Users(Base):
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
     roles = Column(ARRAY(String))
+    totpSecret = Column(String, nullable= True)
     userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
     userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
     accEmailId = relationship("SelfBankStatements", back_populates="accountEmailId", foreign_keys="SelfBankStatements.emailId")
 
 class TokenTable(Base):
     __tablename__="token"
-    userId=Column(String)
+    userId=Column(UUID(as_uuid=True))
     accessToken=Column(String,primary_key=True)
     refreshToken=Column(String, nullable=False)
     status=Column(Boolean)
@@ -69,3 +70,7 @@ class SelfBankStatements(Base):
     balance = Column(Float,nullable= False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now()) 
     accountEmailId = relationship("Users", back_populates="accEmailId", foreign_keys=[emailId])
+
+# class AccountBankStatemeent(Base):
+#      __tablename__ = "accountBankStatement"
+#      id = Column  

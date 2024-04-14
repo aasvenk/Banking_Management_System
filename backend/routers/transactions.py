@@ -105,7 +105,7 @@ def fundTransfer(accountTransfer:schema.accountTransfer,dependencies = Depends(a
     db.commit()
 
 
-@router.post("/approveTransfer/{requestId}")
+@router.post("/approveTransfer/{requestId}",status_code=200)
 def approveTransfer(requestId: UUID,dependencies = Depends(authBearer.jwtBearer()), db: Session = Depends(get_db)):
     token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
     if not token :
@@ -151,3 +151,66 @@ def getAllSelfTransfers(dependencies = Depends(authBearer.jwtBearer()), db: Sess
         userInfoList.append(transDict)
     return  userInfoList
 
+
+@router.delete("/deleteUser/{emailId}", status_code=200)
+def delete_user(emailId: str, db: Session = Depends(get_db), dependencies= Depends(authBearer.jwtBearer())):
+    token = db.query(models.TokenTable).filter(models.TokenTable.accessToken== dependencies).first()
+    if not token :
+        raise HTTPException (status_code= 404, detail= 'User not logged in')
+    user = db.query(models.Users).filter(models.Users.emailId == emailId).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    userInformationSavingQuery= db.query(models.UserInformation).filter(models.UserInformation.emailId == user.emailId,models.UserInformation.accountType=='Saving').first()
+    userInformationCheckingQuery = db.query(models.UserInformation).filter(models.UserInformation.emailId == user.emailId,models.UserInformation.accountType=='Checking').first()
+
+    try : 
+        selfTransferQuery = db.query(models.SelfBankStatements).filter(models.SelfBankStatements.emailId == user.emailId).all()
+        if not selfTransferQuery:
+            pass
+        else:
+            selfTransferResult = db.query(models.SelfBankStatements).filter(models.SelfBankStatements.emailId == user.emailId).delete()
+            db.commit()
+        if not userInformationSavingQuery and not userInformationCheckingQuery:
+            pass
+        else: 
+            if userInformationSavingQuery:
+                transferRequestSavingQuery = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber).all()
+                if not transferRequestSavingQuery:
+                    pass
+                else:
+                    transferRequestResult = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber).delete()
+                    db.commit()
+            if userInformationCheckingQuery:
+                transferRequestCheckingQuery = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber).all()
+                if not transferRequestCheckingQuery:
+                    pass
+                else:
+                    transferRequestResult = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber).delete()
+                    db.commit()
+            if not userInformationSavingQuery:
+                pass
+            else:
+                userInformationSavingResult = db.query(models.UserInformation).filter(models.UserInformation.emailId == user.emailId,models.UserInformation.accountType=='Saving').delete()
+                db.commit()
+            if not userInformationCheckingQuery:
+                pass
+            else: 
+                userInformationSavingResult = db.query(models.UserInformation).filter(models.UserInformation.emailId == user.emailId,models.UserInformation.accountType=='Checking').delete()
+                db.commit()
+        tokenQuery = db.query(models.TokenTable).filter(models.TokenTable.userId == user.id).all()
+        
+        if not tokenQuery: 
+            pass
+        else:
+            tokenResult= db.query(models.TokenTable).filter(models.TokenTable.userId == user.id).delete()
+            db.commit()
+            UserResult = db.query(models.Users).filter(models.Users.emailId == user.emailId).delete()
+            db.commit()
+        return {"message": "User deleted successfully"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+        

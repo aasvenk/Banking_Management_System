@@ -18,6 +18,7 @@ class User(BaseModel):
 class requestDetails(BaseModel):
     emailId:str
     password:str
+    totpToken:str
 
 class tokenSchema(BaseModel):
     accessToken:str
