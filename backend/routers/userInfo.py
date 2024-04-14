@@ -26,15 +26,15 @@ async def createUserInfo(userInfo:schema.userInfo,db:Session=Depends(get_db)):
     userInfoModel.accountBalance=userInfo.accountBalance
     userInfoModel.phoneNo = userInfo.phoneNo
 
-    # if utils.roleChecker(["Internal User"],user.roles):
-    user=db.query(models.Users).filter(models.Users.emailId==userInfo.emailId).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    userInfoModel.custId=user.id
-    userInfoModel.address = user.address
-    userInfoModel.accountNumber=random.randint(1000000000,9999999999)
-    db.add(userInfoModel)
-    db.commit()
+    if utils.roleChecker(["Internal User"],user.roles):
+        user=db.query(models.Users).filter(models.Users.emailId==userInfo.emailId).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        userInfoModel.custId=user.id
+        userInfoModel.address = user.address
+        userInfoModel.accountNumber=random.randint(1000000000,9999999999)
+        db.add(userInfoModel)
+        db.commit()
 
 @router.get("/getUserInfo")
 async def getUserInfo(dependencies=Depends(authBearer.jwtBearer()),db:Session=Depends(get_db)):
