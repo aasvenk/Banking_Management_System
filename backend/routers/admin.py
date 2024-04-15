@@ -112,29 +112,29 @@ def delete_user(emailId: str, db: Session = Depends(get_db), dependencies= Depen
             else:
                 selfTransferResult = db.query(models.SelfBankStatements).filter(models.SelfBankStatements.emailId == user.emailId).delete()
                 db.commit()
-            accountTransferQuery = db.query(models.AccountBankStatement).filter(models.AccountBankStatement.statmentEmailId ==emailId).all()
+            accountTransferQuery = db.query(models.AccountBankStatement).filter((models.AccountBankStatement.fromEmail ==emailId) | (models.AccountBankStatement.toEmail == emailId)).all()
             if not accountTransferQuery:
                 pass
 
             else: 
-                accountTransferResult = db.query(models.AccountBankStatement).filter(models.AccountBankStatement.statmentEmailId ==emailId).delete()
+                accountTransferResult = db.query(models.AccountBankStatement).filter((models.AccountBankStatement.fromEmail ==emailId) | (models.AccountBankStatement.toEmail == emailId)).delete()
                 db.commit()
             if not userInformationSavingQuery and not userInformationCheckingQuery:
                 pass
             else: 
                 if userInformationSavingQuery:
-                    transferRequestSavingQuery = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber).all()
+                    transferRequestSavingQuery = db.query(models.TransferRequest).filter((models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber)|(models.TransferRequest.toAccountNumber == userInformationSavingQuery.accountNumber)).all()
                     if not transferRequestSavingQuery:
                         pass
                     else:
-                        transferRequestResult = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber).delete()
+                        transferRequestResult = db.query(models.TransferRequest).filter((models.TransferRequest.fromAccountNumber == userInformationSavingQuery.accountNumber)|(models.TransferRequest.toAccountNumber == userInformationSavingQuery.accountNumber)).delete()
                         db.commit()
                 if userInformationCheckingQuery:
-                    transferRequestCheckingQuery = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber).all()
+                    transferRequestCheckingQuery = db.query(models.TransferRequest).filter((models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber)|(models.TransferRequest.toAccountNumber == userInformationSavingQuery.accountNumber)).all()
                     if not transferRequestCheckingQuery:
                         pass
                     else:
-                        transferRequestResult = db.query(models.TransferRequest).filter(models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber).delete()
+                        transferRequestResult = db.query(models.TransferRequest).filter((models.TransferRequest.fromAccountNumber == userInformationCheckingQuery.accountNumber)|(models.TransferRequest.toAccountNumber == userInformationSavingQuery.accountNumber)).delete()
                         db.commit()
                 if not userInformationSavingQuery:
                     pass
