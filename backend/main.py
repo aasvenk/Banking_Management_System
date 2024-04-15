@@ -33,7 +33,7 @@ app.include_router(admin.router)
 
 @app.get("/")
 async def root():
-    return {"Message": "Please visit http://156.56.103.190/docs for all backend operations"}
+    return {"Message": "Please visit http://156.56.103.238/docs to use the web application"}
 
 
 
