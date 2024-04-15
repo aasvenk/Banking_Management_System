@@ -5,7 +5,7 @@ engine = database.engine
 SessionLocal = database.SessionLocal
 # from DB import schema
 # from sqlalchemy.orm import Session
-from routers import auth,userInfo,transactions
+from routers import auth,userInfo,transactions,accounts,admin
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
@@ -28,6 +28,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(userInfo.router)
 app.include_router(transactions.router)
+app.include_router(accounts.router)
+app.include_router(admin.router)
 
 @app.get("/")
 async def root():

@@ -49,8 +49,8 @@ def createRefreshToken(subject:Union[str,Any]):
     encodedJwt= jwt.encode(toEncode,JWT_REFRESH_KEY,ALGORITHM)
     return encodedJwt
 
-def roleChecker(requiredRoles:List, userRoles):
-    if not any(role in userRoles for role in requiredRoles):
+def roleChecker(requiredRole:str, userRole):
+    if not userRole==requiredRole:
         raise HTTPException(
                 status_code=403, detail="Operation not permitted"
             )

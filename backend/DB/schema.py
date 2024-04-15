@@ -1,6 +1,6 @@
 from pydantic import BaseModel,UUID4
 from datetime import date
-from typing import Optional,List
+from typing import Optional
 from enum import Enum
 
 
@@ -12,7 +12,7 @@ class User(BaseModel):
     password:str
     dob :date
     address: str
-    roles:List[str]
+    roles:str
 
     
 class requestDetails(BaseModel):
@@ -39,18 +39,26 @@ class selfTransferMoney(BaseModel):
     toAccountType:str
     transferAmount:float
 
-# class UserInformation(BaseModel):
-#     emailId :str
-#     accountNumber: int
-#     custId: str
-#     accountType: str
-#     accountBalance: float
+class emailDetail(BaseModel):
+    emailId:str
     
 class accountTransfer(BaseModel):
     fromAccountType: str
     toAccountNumber:int
     toRoutingNumber: int
     transferBalance: float
+    totpToken:str
+
+class userAccUpdate(BaseModel):
+    accountType: Optional[str] = None
+    accountBalance : Optional[str] = None
+
+class deleteDetails(BaseModel):
+    emailId: str
+    accountNo: int
+class getCustAccInfo(BaseModel):
+    emailId: str
+    accountType: str
 
 
 

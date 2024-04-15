@@ -5,8 +5,10 @@ from DB import models
 from DB import database
 from utils import utils
 from utils import authBearer
-from fastapi.responses import JSONResponse
+from fastapi.responses import StreamingResponse
 import os
+import qrcode
+from io import BytesIO
 from dotenv import load_dotenv
 from pyotp import random_base32,TOTP
 
@@ -42,6 +44,12 @@ async def registeration(user:schema.User,db:Session=Depends(get_db)):
     userModel=models.Users()
     # if user.emailId  == db.query(models.Users).filter(models.Users.emailId== user.emailId).first().emailId is not None:
     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email ID already Exists ")
+    if not (user.roles =="Customer" or user.roles =="Internal User" or user.roles=="Admin"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Allowed user role type: Customer or Internal User or admin")
+    
+    existAdmin=db.query(models.Users).filter(models.Users.roles=="Admin").first()
+    if existAdmin and user.roles=="Admin":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admin already exists")
     userModel.address=user.address
     userModel.lastName=user.lastName
     userModel.firstName=user.firstName
@@ -61,16 +69,25 @@ async def registeration(user:schema.User,db:Session=Depends(get_db)):
 @router .post("/login")
 async def login(requestDetails:schema.requestDetails, db:Session=Depends(get_db)):
     user=db.query(models.Users).filter(models.Users.emailId==requestDetails.emailId).first()
-    print(user)
+    login_attempt = models.LoginAttempt(emailId=requestDetails.emailId)
     if user is None:
+        login_attempt.message = "Incorrect Email ID"
+        db.add(login_attempt)
+        db.commit()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="INCORRECT EMAIL ID!!")
 
     hashedPassword=user.password
     if not utils.verifyPassword(requestDetails.password,hashedPassword):
+        login_attempt.message = "Incorrect Password"
+        db.add(login_attempt)
+        db.commit()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="INCORRECT PASSWORD!!")
     
     totp = TOTP(user.totpSecret)
     if not totp.verify(requestDetails.totpToken):
+        login_attempt.message = "Invalid 2FA token"
+        db.add(login_attempt)
+        db.commit()
         raise HTTPException(status_code=400,detail= "Invalid 2FA token")
     
     access=utils.createAccessToken(user.id)
@@ -80,6 +97,11 @@ async def login(requestDetails:schema.requestDetails, db:Session=Depends(get_db)
     db.add(token)
     db.commit()
     db.refresh(token)
+    login_attempt.loginStatus = True
+    login_attempt.message = "Login successful"
+    login_attempt.roles=user.roles
+    db.add(login_attempt)
+    db.commit()
     return{
         "accessToken":access,
         "refreshToken":refresh
@@ -91,21 +113,7 @@ async def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depend
     payload= authBearer.decodeJwt(token)
     userId=payload['sub']
     tokenRecord=db.query(models.TokenTable).all()
-    #Check later if required
-    # info=[]
-    # for record in tokenRecord:
-    #     if (datetime.utcnow - record.createdDate).total_seconds()/60 > 60:
-    #         info.append(record.userId)
-
-    # existingToken= db.query(models.TokenTable).filter(models.TokenTable.userId == userId, models.TokenTable.accessToken == token).first()
-    # if existingToken:
-    #     existingToken.status=False
-    #     db.delete(existingToken)
-    #     db.commit()
-    #     db.refresh()
-    # return {"message":"Logout Successful"}
-    
-    
+     
     existingToken = db.query(models.TokenTable).filter(models.TokenTable.userId== userId).all()
     if existingToken: 
         for token in existingToken :
@@ -113,4 +121,26 @@ async def logout(dependencies=Depends(authBearer.jwtBearer()),db: Session=Depend
             db.delete(token)
             db.commit()
     return {"message":"Logout Successful"}
+
+@router.get("/qr")
+def generate_qr(totpURL: str):
+    # Create QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(totpURL)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    img_bytes = BytesIO()
+    img.save(img_bytes)
+    img_bytes.seek(0)
+
+    return StreamingResponse(img_bytes, media_type="image/jpeg", headers={
+        "Content-Disposition": f"attachment; filename=qr_code.jpg"
+    })
     

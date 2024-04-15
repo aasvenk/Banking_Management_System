@@ -17,11 +17,13 @@ class Users(Base):
     password=Column(String, nullable=False)
     dob= Column(Date,nullable=False)
     address = Column(String,nullable=False)
-    roles = Column(ARRAY(String))
+    roles = Column(String,nullable=False)
     totpSecret = Column(String, nullable= True)
     userCustId= relationship("UserInformation", back_populates="userId", foreign_keys="UserInformation.custId")
     userEmailId=relationship("UserInformation",back_populates="userEmail",foreign_keys="UserInformation.emailId")
     accEmailId = relationship("SelfBankStatements", back_populates="accountEmailId", foreign_keys="SelfBankStatements.emailId")
+    fromAccEmail= relationship("AccountBankStatement", back_populates="fromEmailPop", foreign_keys="AccountBankStatement.fromEmail")
+    toAccEmail= relationship("AccountBankStatement", back_populates="toEmailPop", foreign_keys="AccountBankStatement.toEmail")
 
 class TokenTable(Base):
     __tablename__="token"
@@ -46,7 +48,8 @@ class UserInformation(Base):
     userId=relationship("Users", back_populates="userCustId",foreign_keys=[custId])
     userEmail=relationship("Users",back_populates="userEmailId",foreign_keys=[emailId])
     userAccountNo = relationship("TransferRequest",back_populates= "userAccountNumber", foreign_keys= "TransferRequest.fromAccountNumber")
-   
+    fromAcc = relationship("AccountBankStatement",back_populates= "fromAccNumber", foreign_keys= "AccountBankStatement.fromAccountNumber")
+    toAcc = relationship("AccountBankStatement",back_populates="toAccNumber",foreign_keys="AccountBankStatement.toAccountNumber")
 
 class TransferRequest(Base):
     __tablename__ = "transferrequests"
@@ -71,6 +74,30 @@ class SelfBankStatements(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now()) 
     accountEmailId = relationship("Users", back_populates="accEmailId", foreign_keys=[emailId])
 
-# class AccountBankStatemeent(Base):
-#      __tablename__ = "accountBankStatement"
-#      id = Column  
+class AccountBankStatement(Base):
+     __tablename__ = "accountbankstatement"
+     id = Column (UUID(as_uuid=True), primary_key=True,default=uuid.uuid4,index=True) 
+     transferId = Column(UUID(as_uuid=True),ForeignKey('transferrequests.id'), nullable=False)
+     fromAccountNumber = Column(BigInteger, ForeignKey('userinformation.accountNumber'))
+     toAccountNumber=Column(BigInteger,ForeignKey('userinformation.accountNumber'))
+     fromEmail=Column(String,ForeignKey('users.emailId'),nullable=False)
+     toEmail=Column(String,ForeignKey('users.emailId'),nullable=False)
+     amount = Column(Float)
+     balance = Column(Float,nullable=False)
+     transactionType = Column(String)
+     timestamp=Column(DateTime(timezone=True), server_default=func.now())
+     fromAccNumber = relationship("UserInformation", back_populates= "fromAcc", foreign_keys= [fromAccountNumber])
+     statmentEmailId=Column(String,nullable=False)
+     toAccNumber=relationship("UserInformation", back_populates= "toAcc", foreign_keys= [toAccountNumber])
+     fromEmailPop=relationship("Users", back_populates="fromAccEmail", foreign_keys=[fromEmail])
+     toEmailPop=relationship("Users", back_populates="toAccEmail", foreign_keys=[toEmail])
+
+
+class LoginAttempt(Base):
+    __tablename__ = "loginattempts"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    emailId = Column(String, nullable=False)
+    loginStatus = Column(Boolean, default=False) 
+    message = Column(String, nullable=False)
+    roles = Column(String, default=['None'])
+    timestamp = Column(DateTime, default=datetime.datetime.now)
